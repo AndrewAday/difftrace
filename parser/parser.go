@@ -90,9 +90,9 @@ func (p *Parser) Parse() (*OutputLine, error) {
 			tok, lit = p.scanIgnoreWhitespace()
 			if tok == CLOSE_PAREN {
 				break
-			} else if tok == MEMADDR {
+			} else if tok == MEMADDR || tok == POINTER {
 				// Replace with 0x0.
-				line.Args = append(line.Args, "0x0")
+				line.Args = append(line.Args, lit)
 				// Parse any struct arguments as a single arg.
 			} else if tok == OPEN_BRACE {
 				var buf bytes.Buffer
@@ -103,8 +103,8 @@ func (p *Parser) Parse() (*OutputLine, error) {
 						buf.WriteString(lit)
 						line.Args = append(line.Args, buf.String())
 						break
-					} else if tok == MEMADDR {
-						buf.WriteString("0x0")
+					} else if tok == MEMADDR || tok == POINTER{
+						buf.WriteString(lit)
 					} else {
 						buf.WriteString(lit)
 					}
@@ -118,8 +118,8 @@ func (p *Parser) Parse() (*OutputLine, error) {
 						buf.WriteString(lit)
 						line.Args = append(line.Args, buf.String())
 						break
-					} else if tok == MEMADDR {
-						buf.WriteString("0x0")
+					} else if tok == MEMADDR || tok == POINTER{
+						buf.WriteString(lit)
 					} else {
 						buf.WriteString(lit)
 					}
@@ -143,8 +143,8 @@ func (p *Parser) Parse() (*OutputLine, error) {
 	var result bytes.Buffer
 	for {
 		tok, lit = p.scan()
-		if tok == MEMADDR {
-			result.WriteString("0x0")
+		if tok == MEMADDR || tok == POINTER {
+			result.WriteString(lit)
 		} else if tok == NEWLINE {
 			break
 		} else {

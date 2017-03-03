@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"fmt"
 )
 
 type Token int
@@ -27,6 +28,7 @@ const (
 	SEP         // ,
 	EQUALS      // =
 	SIGNAL      // ---
+	POINTER     // 0x[addr]:=[data]
 )
 
 var eof = rune(0)
@@ -165,7 +167,22 @@ func (s *Scanner) scanAddress() (tok Token, lit string) {
 		buf.WriteRune(r)
 	}
 
-	return MEMADDR, buf.String()
+	// check to see if this is a pointer to data, in form 0x[addr]:=[data]
+	r := s.read()
+	if r != ':' {
+		s.unreadRune()
+		return MEMADDR, buf.String()
+	}
+	buf.WriteRune(r)
+	buf.WriteRune(s.read())
+	if r = s.read(); r != '"' {
+		fmt.Printf("unexpected pointer format, expected 0x[addr]:=\"[data]\", got %v\n", buf.String())
+		return MEMADDR, buf.String()
+	}
+	_, str := s.scanString()
+	buf.WriteString(str)
+
+	return POINTER, buf.String()
 }
 
 // scanString consumes a string from the scanner.
