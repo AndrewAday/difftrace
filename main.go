@@ -17,7 +17,16 @@ func main() {
 			}
 			break
 		} else {
+			fmt.Println("-------------------------\n")
+			fmt.Printf("Signal: %v\n", line.Signal)
+			fmt.Printf("FuncName: %v\n", line.FuncName)
+			fmt.Printf("Args: %v\n", line.Args)
+			for j, arg := range line.Args {
+				fmt.Printf("\narg %v: %v\n", j, arg)
+			}
+			fmt.Printf("Result: %v\n", line.Result)
 			fmt.Println(line.Unparse())
+			fmt.Println("-------------------------\n")
 		}
 	}
 }

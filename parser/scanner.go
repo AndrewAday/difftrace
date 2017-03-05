@@ -31,6 +31,13 @@ const (
 	POINTER     // 0x[addr]:=[data]
 )
 
+var terminator = map[rune]bool{
+	',': true,
+	']': true,
+	'}': true,
+	')': true,
+}
+
 var eof = rune(0)
 var ErrEOF = errors.New("EOF")
 
@@ -94,6 +101,12 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 		} else {
 			s.unreadRunes(2)
 		}
+	} else if r=='&' {
+		// then r is a pointer
+		// read in the 0x
+		s.read()
+		s.read()
+		return s.scanAddress()
 	} else if r == '-' {
 		// - could be a signal (lines start with ---).
 		r = s.read()
@@ -156,8 +169,9 @@ func (s *Scanner) scanAddress() (tok Token, lit string) {
 	buf.WriteString("0x")
 
 	// Read until there are no letters or digits.
+	var r rune
 	for {
-		r := s.read()
+		r = s.read()
 		if r == eof {
 			break
 		} else if !(isDigit(r) || isLetter(r)) {
@@ -167,14 +181,17 @@ func (s *Scanner) scanAddress() (tok Token, lit string) {
 		buf.WriteRune(r)
 	}
 
+	if r == eof {
+		return MEMADDR, buf.String()
+	}
+
 	// check to see if this is a pointer to data, in form 0x[addr]:=[data]
-	r := s.read()
-	if r != ':' {
+	r = s.read()
+	if r != '=' {
 		s.unreadRune()
 		return MEMADDR, buf.String()
 	}
 	buf.WriteRune(r)
-	buf.WriteRune(s.read())
 	if r = s.read(); r != '"' {
 		fmt.Printf("unexpected pointer format, expected 0x[addr]:=\"[data]\", got %v\n", buf.String())
 		return MEMADDR, buf.String()
@@ -198,15 +215,20 @@ func (s *Scanner) scanString() (tok Token, lit string) {
 		}
 		if r == '"' {
 			buf.WriteRune(r)
-			// Reached end of literal. Consume ellipsis if present.
-			if r = s.read(); r == '.' {
-				s.read()
-				s.read()
-				buf.WriteString("...")
-			} else {
-				s.unreadRune()
+			next := s.read()
+			_,ok := terminator[next]
+			s.unreadRune()
+			if next == eof || ok {
+				// Reached end of literal. Consume ellipsis if present.
+				if r = s.read(); r == '.' {
+					s.read()
+					s.read()
+					buf.WriteString("...")
+				} else {
+					s.unreadRune()
+				}
+				break
 			}
-			break
 		}
 		buf.WriteRune(r)
 	}

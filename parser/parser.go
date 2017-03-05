@@ -91,18 +91,24 @@ func (p *Parser) Parse() (*OutputLine, error) {
 			if tok == CLOSE_PAREN {
 				break
 			} else if tok == MEMADDR || tok == POINTER {
-				// Replace with 0x0.
 				line.Args = append(line.Args, lit)
 				// Parse any struct arguments as a single arg.
 			} else if tok == OPEN_BRACE {
 				var buf bytes.Buffer
+				open_brace_counter := 1
 				buf.WriteString(lit)
 				for {
 					tok, lit = p.scan()
-					if tok == CLOSE_BRACE {
+					if tok == OPEN_BRACE {
 						buf.WriteString(lit)
-						line.Args = append(line.Args, buf.String())
-						break
+						open_brace_counter++
+					} else if tok == CLOSE_BRACE {
+						buf.WriteString(lit)
+						open_brace_counter--
+						if (open_brace_counter == 0) {
+							line.Args = append(line.Args, buf.String())
+							break
+						}
 					} else if tok == MEMADDR || tok == POINTER{
 						buf.WriteString(lit)
 					} else {
