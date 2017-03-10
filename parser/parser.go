@@ -148,7 +148,7 @@ func (p *Parser) Parse() (*OutputLine, error) {
 	// Read everything after '=' until newline as the result.
 	var result bytes.Buffer
 	for {
-		tok, lit = p.scan()
+		tok, lit = p.scanIgnoreWhitespace()
 		if tok == MEMADDR || tok == POINTER {
 			result.WriteString(lit)
 		} else if tok == NEWLINE {
