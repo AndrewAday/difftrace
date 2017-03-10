@@ -176,6 +176,9 @@ func (o *OutputLine) Unparse() string {
 				buf.WriteString(")")
 			}
 		}
+		if len(o.Args) == 0 {
+			buf.WriteString(")")
+		}
 		buf.WriteString(" = ")
 		buf.WriteString(o.Result)
 	}

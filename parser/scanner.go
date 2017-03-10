@@ -68,7 +68,7 @@ func NewScanner(r io.Reader) *Scanner {
 // Returns rune(0) if an error occurs.
 func (s *Scanner) read() rune {
 	r, _, err := s.r.ReadRune()
-	if err != nil {
+	if err != nil || r == '+'{ // last line is format +++ exited with [] +++
 		return eof
 	}
 	return r
