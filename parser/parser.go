@@ -61,7 +61,7 @@ func (p *Parser) scanIgnoreWhitespace() (tok Token, lit string) {
 func (p *Parser) Parse() (*OutputLine, error) {
 	line := &OutputLine{}
 	tok, lit := p.scanIgnoreWhitespace()
-	if tok == EOF {
+	if tok == EOF || lit == "+" {
 		return line, ErrEOF
 	}
 
@@ -95,10 +95,11 @@ func (p *Parser) Parse() (*OutputLine, error) {
 				// Parse any struct arguments as a single arg.
 			} else if tok == OPEN_BRACE {
 				var buf bytes.Buffer
-				open_brace_counter := 1
 				buf.WriteString(lit)
+				open_brace_counter := 1
 				for {
 					tok, lit = p.scan()
+
 					if tok == OPEN_BRACE {
 						buf.WriteString(lit)
 						open_brace_counter++
@@ -118,12 +119,19 @@ func (p *Parser) Parse() (*OutputLine, error) {
 			} else if tok == OPEN_SQ {
 				var buf bytes.Buffer
 				buf.WriteString(lit)
+				open_sq_counter := 1
 				for {
 					tok, lit = p.scan()
-					if tok == CLOSE_SQ {
+					if tok == OPEN_SQ {
 						buf.WriteString(lit)
-						line.Args = append(line.Args, buf.String())
-						break
+						open_sq_counter++
+					} else if tok == CLOSE_SQ {
+						buf.WriteString(lit)
+						open_sq_counter--
+						if (open_sq_counter == 0) {
+							line.Args = append(line.Args, buf.String())
+							break
+						}
 					} else if tok == MEMADDR || tok == POINTER{
 						buf.WriteString(lit)
 					} else {
@@ -149,14 +157,13 @@ func (p *Parser) Parse() (*OutputLine, error) {
 	var result bytes.Buffer
 	for {
 		tok, lit = p.scanIgnoreWhitespace()
-		if tok == MEMADDR || tok == POINTER {
-			result.WriteString(lit)
-		} else if tok == NEWLINE {
+		if tok == NEWLINE {
 			break
 		} else {
 			result.WriteString(lit)
 		}
 	}
+
 	line.Result = result.String()
 	return line, nil
 }

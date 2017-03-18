@@ -31,7 +31,7 @@ const (
 	POINTER     // 0x[addr]:=[data]
 )
 
-var terminator = map[rune]bool{
+var 	terminator = map[rune]bool{
 	',': true,
 	']': true,
 	'}': true,
@@ -68,7 +68,7 @@ func NewScanner(r io.Reader) *Scanner {
 // Returns rune(0) if an error occurs.
 func (s *Scanner) read() rune {
 	r, _, err := s.r.ReadRune()
-	if err != nil || r == '+'{ // last line is format +++ exited with [] +++
+	if err != nil { // last line is format +++ exited with [] +++
 		return eof
 	}
 	return r
@@ -193,7 +193,7 @@ func (s *Scanner) scanAddress() (tok Token, lit string) {
 	}
 	buf.WriteRune(r)
 	if r = s.read(); r != '"' {
-		fmt.Printf("unexpected pointer format, expected 0x[addr]:=\"[data]\", got %v\n", buf.String())
+		fmt.Printf("unexpected pointer format, expected 0x[addr]=\"[data]\", got %v\n", buf.String())
 		return MEMADDR, buf.String()
 	}
 	_, str := s.scanString()
@@ -214,12 +214,14 @@ func (s *Scanner) scanString() (tok Token, lit string) {
 			break
 		}
 		if r == '"' {
-			buf.WriteRune(r)
 			next := s.read()
 			_,ok := terminator[next]
-			s.unreadRune()
+			if next != ',' {
+				s.unreadRune()
+			}
 			if next == eof || ok {
 				// Reached end of literal. Consume ellipsis if present.
+				buf.WriteRune(r)
 				if r = s.read(); r == '.' {
 					s.read()
 					s.read()
