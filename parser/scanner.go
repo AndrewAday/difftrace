@@ -106,7 +106,9 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 		// read in the 0x
 		s.read()
 		s.read()
-		return s.scanAddress()
+		tok, lit = s.scanAddress()
+		lit = "&" + lit
+		return tok, lit
 	} else if r == '-' {
 		// - could be a signal (lines start with ---).
 		r = s.read()
