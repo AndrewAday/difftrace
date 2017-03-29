@@ -101,6 +101,21 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 		} else {
 			s.unreadRunes(2)
 		}
+	} else if r == '/'{
+		var prev rune
+		if r := s.read(); r == '*' {
+			prev = r
+			for {
+				r = s.read()
+				if prev == '*' && r =='/' {
+					break
+				}
+				prev = r
+			}
+			return s.Scan()
+		} else {
+			s.unreadRunes(2)
+		}
 	} else if r=='&' {
 		// then r is a pointer
 		// read in the 0x
