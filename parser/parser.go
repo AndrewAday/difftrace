@@ -178,16 +178,17 @@ func (p *Parser) Parse() (*OutputLine, error) {
 
 	// Read everything after '=' until newline as the result.
 	var result bytes.Buffer
+
+	tok, lit = p.scanIgnoreWhitespace()
+	result.WriteString(lit)
+	line.Result = result.String()
+
 	for {
 		tok, lit = p.scanIgnoreWhitespace()
 		if tok == NEWLINE {
 			break
-		} else {
-			result.WriteString(lit)
 		}
 	}
-
-	line.Result = result.String()
 	return line, nil
 }
 
