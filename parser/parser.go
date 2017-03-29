@@ -88,7 +88,30 @@ func (p *Parser) Parse() (*OutputLine, error) {
 		// Read all the args up to CLOSE_PAREN
 		for {
 			tok, lit = p.scanIgnoreWhitespace()
-			if tok == CLOSE_PAREN {
+			if tok == OPEN_PAREN {
+				//If we encounter an open paren
+				openParenCtr := 1
+				var buf bytes.Buffer
+				buf.WriteString(line.Args[len(line.Args)-1])
+				buf.WriteString(lit)
+				for {
+					tok, lit = p.scan()
+
+					if tok == OPEN_PAREN {
+						buf.WriteString(lit)
+						openParenCtr += 1
+					} else if tok == CLOSE_PAREN {
+						buf.WriteString(lit)
+						openParenCtr -= 1
+						if openParenCtr == 0 {
+							break
+						}
+					} else {
+						buf.WriteString(lit)
+					}
+				}
+				line.Args[len(line.Args)-1] = buf.String()
+			} else if tok == CLOSE_PAREN {
 				break
 			} else if tok == MEMADDR || tok == POINTER {
 				line.Args = append(line.Args, lit)
