@@ -237,9 +237,10 @@ func (s *Scanner) scanString() (tok Token, lit string) {
 		if r == '"' {
 			next := s.read()
 			_,ok := terminator[next]
-			if next != ',' {
-				s.unreadRune()
-			}
+			//if next != ',' {
+			//	s.unreadRune()
+			//}
+			s.unreadRune()
 			if next == eof || ok {
 				// Reached end of literal. Consume ellipsis if present.
 				buf.WriteRune(r)

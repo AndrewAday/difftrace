@@ -135,7 +135,7 @@ func (p *Parser) Parse() (*OutputLine, error) {
 							line.Args = append(line.Args, buf.String())
 							break
 						}
-					} else if tok == MEMADDR || tok == POINTER{
+					} else if tok == MEMADDR || tok == POINTER {
 						buf.WriteString(lit)
 					} else {
 						buf.WriteString(lit)
