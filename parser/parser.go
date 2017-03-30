@@ -116,6 +116,8 @@ func (p *Parser) Parse() (*OutputLine, error) {
 			} else if tok == MEMADDR || tok == POINTER {
 				line.Args = append(line.Args, lit)
 				// Parse any struct arguments as a single arg.
+			} else if tok == THROWAWAY {
+				continue
 			} else if tok == OPEN_BRACE {
 				var buf bytes.Buffer
 				buf.WriteString(lit)

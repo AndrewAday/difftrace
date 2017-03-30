@@ -28,10 +28,11 @@ const (
 	SEP         // ,
 	EQUALS      // =
 	SIGNAL      // ---
+	THROWAWAY   // This is meant to handle things like 0777
 	POINTER     // 0x[addr]:=[data]
 )
 
-var 	terminator = map[rune]bool{
+var terminator = map[rune]bool{
 	',': true,
 	']': true,
 	'}': true,
@@ -100,6 +101,9 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 			return s.scanAddress()
 		} else {
 			s.unreadRunes(2)
+			if isDigit(r) {
+				return THROWAWAY, string(r)
+			}
 		}
 	} else if r == '/'{
 		var prev rune
