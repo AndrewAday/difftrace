@@ -174,6 +174,11 @@ func (s *Scanner) Scan() (tok Token, lit string) {
 		return EQUALS, string(r)
 	case '\n':
 		return NEWLINE, string(r)
+	case '~':
+		if r := s.read(); r == '[' {
+			return OPEN_SQ, "~["
+		}
+		s.unreadRune()
 	}
 
 	return ILLEGAL, string(r)
