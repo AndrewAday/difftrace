@@ -11,6 +11,7 @@ type OutputLine struct {
 	FuncName string
 	Args     []string
 	Result   string
+	Cover    []uint64
 }
 
 // Parser represents a parser.
