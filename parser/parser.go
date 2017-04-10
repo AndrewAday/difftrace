@@ -3,6 +3,7 @@ package parser
 import (
 	"bytes"
 	"errors"
+	"strings"
 	"io"
 )
 
@@ -65,7 +66,15 @@ func (p *Parser) Parse() (*OutputLine, error) {
 	if tok == EOF || lit == "+" {
 		return line, ErrEOF
 	}
-
+	if strings.Contains(lit, "Cover:") {
+		line.Result = lit
+		for {
+			tok, lit = p.scanIgnoreWhitespace()
+			if tok == NEWLINE {
+				return line, nil
+			}
+		}
+	}
 	// Handle signals.
 	if tok == SIGNAL {
 		// Parse the line unchanged.
@@ -170,7 +179,7 @@ func (p *Parser) Parse() (*OutputLine, error) {
 				line.Args = append(line.Args, lit)
 			}
 		}
-	} else {
+	}  else {
 		return nil, errors.New("Expected OPEN_PAREN")
 	}
 
