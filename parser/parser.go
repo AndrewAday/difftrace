@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 	"io"
+	"fmt"
+	"strconv"
 )
 
 type OutputLine struct {
@@ -13,6 +15,7 @@ type OutputLine struct {
 	Args     []string
 	Result   string
 	Cover    []uint64
+	Pid      int64
 }
 
 // Parser represents a parser.
@@ -63,10 +66,14 @@ func (p *Parser) scanIgnoreWhitespace() (tok Token, lit string) {
 func (p *Parser) Parse() (*OutputLine, error) {
 	line := &OutputLine{}
 	tok, lit := p.scanIgnoreWhitespace()
+	fmt.Printf("LITS: %s\n", lit)
 	if tok == EOF || lit == "+" {
 		return line, ErrEOF
-	}
-	if strings.Contains(lit, "Cover:") {
+	} else if pid, err := strconv.ParseInt(lit, 10, 64); err == nil {
+		fmt.Printf("HERE: %d\n", pid)
+		line.Pid = pid
+		tok, lit = p.scanIgnoreWhitespace()
+	} else if strings.Contains(lit, "Cover:") {
 		line.Result = lit
 		for {
 			tok, lit = p.scanIgnoreWhitespace()
